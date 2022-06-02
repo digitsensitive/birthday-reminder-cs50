@@ -1,0 +1,10 @@
+<!-- Extending Layout -->
+{% extends "layout.html" %}
+
+<!-- Block Title -->
+{% block title %} Error {% endblock %}
+
+<!-- Block Main -->
+{% block main %}
+<div>Registration failed: {{ error_message }}</div>
+{% endblock %}
