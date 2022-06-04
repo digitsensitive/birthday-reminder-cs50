@@ -2,7 +2,7 @@
 {% extends "layout.html" %}
 
 <!-- Block Title -->
-{% block title %} Register {% endblock %}
+{% block title %} Login {% endblock %}
 
 <!-- Block Main -->
 {% block main %}
@@ -13,7 +13,7 @@
 {% endif %}
 
 <!-- Form -->
-<form action="/register" method="post">
+<form action="/login" method="post">
   <div class="mb-3">
     <input
       autocomplete="off"
@@ -35,16 +35,6 @@
       type="password"
     />
   </div>
-  <div class="mb-3">
-    <input
-      autocomplete="off"
-      class="form-control mx-auto w-auto"
-      id="password_confirmation"
-      name="password_confirmation"
-      placeholder="Repeat Password"
-      type="password"
-    />
-  </div>
-  <button class="btn btn-dark" type="submit">Register</button>
+  <button class="btn btn-dark" type="submit">Login</button>
 </form>
 {% endblock %}
