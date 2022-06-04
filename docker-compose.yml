@@ -1,0 +1,26 @@
+services:
+  app:
+    # Configuration options to build Docker image from source
+    build:
+      # Path to directory with Dockerfile
+      context: ./app
+    # Short syntax to define host IP and host port
+    ports:
+      - "8000:5000"
+    # Define volume for app
+    volumes:
+      - ./app:/app
+
+  # mysqldb:
+  # image: mysql
+  # Short syntax to define host IP and host port
+  # ports:
+  #   - "3306:3306"
+  # environment:
+  #   - MYSQL_ROOT_PASSWORD=p@ssw0rd1
+  # volumes:
+  #   - mysql:/var/lib/mysql
+  #   - mysql_config:/etc/mysql
+# volumes:
+# mysql:
+# mysql_config:
