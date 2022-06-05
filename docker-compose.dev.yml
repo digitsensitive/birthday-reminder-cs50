@@ -1,0 +1,32 @@
+services:
+  # For the services you either have to define a build or an image
+  app:
+    # Configuration options to build Docker image from source
+    build:
+      # Path to directory with Dockerfile
+      context: ./app
+    env_file:
+      - "app.env"
+    # Define host and container port
+    ports:
+      - 8000:5000
+    # Short syntax (VOLUME:CONTAINER_PATH) to specify volume mount
+    volumes:
+      - ./app:/app
+
+  mysqldb:
+    # Here we define an image, which is pulled from Hub
+    image: mysql
+    # Define host and container port
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=p@ssw0rd1
+    # Short syntax (VOLUME:CONTAINER_PATH) to specify volume mount
+    volumes:
+      - mysql:/var/lib/mysql
+      - mysql_config:/etc/mysql
+
+volumes:
+  mysql:
+  mysql_config:

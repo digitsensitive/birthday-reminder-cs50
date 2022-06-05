@@ -1,19 +1,18 @@
 from flask import Flask, redirect, render_template, request, session
 from flask_session import Session
-import sqlite3
-
 from werkzeug.security import check_password_hash, generate_password_hash
+from database import MySQL
+
+# import sys
+# print(row, file=sys.stderr)
 
 # Create a Flash instance
 app = Flask(__name__)
 
-# Ensure templates are auto-reloaded
-app.config["TEMPLATES_AUTO_RELOAD"] = True
-
 # Create a connection and cursor object to represent the database
-database_users_connection = sqlite3.connect(
-    'users.db', check_same_thread=False)
-database_users = database_users_connection.cursor()
+mysql = MySQL(app)
+connection = mysql.connection("users")
+cursor = connection.cursor(buffered=True)
 
 # Configure Sessions
 app.config["SESSION_PERMANENT"] = False
@@ -45,19 +44,30 @@ def login():
             return render_template("login.html", error_message="Missing password. ")
 
         # Query database for username
-        user_data = database_users.execute(
-            'SELECT * FROM users WHERE username = ?', [username])
+        query = "SELECT * FROM users WHERE username=%s"
+        cursor.execute(query, (username,))
+        row = cursor.fetchone()
+
+        # Ensure if username exists
+        if row is None:
+            return render_template("login.html", error_message="Invalid username. ")
 
         # Ensure username or password is correct
-        if not user_data.fetchone() or not check_password_hash(user_data.fetchone()[2], password):
+        if not check_password_hash(row[2], password):
             return render_template("login.html", error_message="Invalid username and/or password. ")
 
         # Remember which user has logged in
-        session["user_id"] = user_data.fetchone()[0]
+        session["user_id"] = row[0]
 
         return redirect("/")
 
     return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -74,11 +84,11 @@ def register():
             return render_template("register.html", error_message="Missing username. ")
 
         # Evaluate if the user does already exist
-        user_exists = database_users.execute(
-            'SELECT EXISTS(SELECT 1 FROM users WHERE username = ?)', [username])
+        query = "SELECT * FROM users WHERE username = %s"
+        cursor.execute(query, (username,))
+        row = cursor.fetchone()
 
-        user_exists = user_exists.fetchone()[0]
-        if user_exists == 1:
+        if row:
             return render_template("register.html", error_message="Username already exists. ")
 
         # Check if a password was entered
@@ -94,9 +104,14 @@ def register():
             return render_template("register.html", error_message="Passwords do not match. ")
 
         # Add user to database
-        database_users.execute('INSERT INTO users (username, hash) VALUES(?, ?)', (
-                               username, generate_password_hash(password)))
-        database_users_connection.commit()
+        user = ("INSERT INTO users (username, hash) VALUES(%s, %s)")
+        user_data = (username, generate_password_hash(password))
+        cursor.execute(user, user_data)
+        connection.commit()
 
         return redirect("/")
     return render_template("register.html")
+
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0')
