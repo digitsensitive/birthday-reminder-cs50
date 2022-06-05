@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 # Create a connection and cursor object to represent the database
 mysql = MySQL(app)
-connection = mysql.connection("users")
+connection = mysql.get_connection("users")
 cursor = connection.cursor(buffered=True)
 
 # Configure Sessions
