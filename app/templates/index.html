@@ -6,5 +6,16 @@
 
 <!-- Block Main -->
 {% block main %}
-<div class="container">Hello</div>
-{% endblock %}
+
+<!-- Loop through birthday cards -->
+{% for birthday in birthdays %}
+<div class="card mx-auto mb-4" style="width: 240px">
+  <div class="card-body">
+    <h5 class="card-title">{{ birthday['name'] }}</h5>
+    <p class="card-text">{{ birthday['birth_date'] }}</p>
+  </div>
+  <div class="card-footer text-muted">
+    {{ birthday['days_until_birthday'] }} days left
+  </div>
+</div>
+{% endfor %} {% endblock %}

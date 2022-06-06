@@ -34,19 +34,33 @@ class MySQL:
                 print(err)
 
     def init(self):
-        # Create Users Database
+        # ---
+        # Create Main Database
         cnx = self.get_connection()
         cursor = cnx.cursor()
-        cursor.execute("CREATE DATABASE IF NOT EXISTS users")
+        cursor.execute("CREATE DATABASE IF NOT EXISTS birthday_reminder")
         cursor.close()
 
-        # Create Table in Users Database
-        cnx = self.get_connection("users")
+        # ---
+        # Create Tables in Main Database
+        cnx = self.get_connection("birthday_reminder")
         cursor = cnx.cursor()
+
+        # Create users table
         cursor.execute(
             "CREATE TABLE IF NOT EXISTS `users` ("
             "`id` INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL, "
             "`username` TEXT NOT NULL, "
             "`hash` TEXT NOT NULL"
             ")")
+
+        # Create birthdays table
+        cursor.execute(
+            "CREATE TABLE IF NOT EXISTS `birthdays` ("
+            "`id` INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL, "
+            "`user_id` INTEGER NOT NULL, "
+            "`name` TEXT NOT NULL, "
+            "`birth_date` DATE NOT NULL"
+            ")")
+
         cursor.close()

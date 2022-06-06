@@ -1,0 +1,39 @@
+<!-- Extending Layout -->
+{% extends "layout.html" %}
+
+<!-- Block Title -->
+{% block title %} Add Birthday {% endblock %}
+
+<!-- Block Main -->
+{% block main %}
+
+<!-- Display Error Message -->
+{% if error_message %}
+<div class="alert alert-danger" role="alert">{{ error_message }}</div>
+{% endif %}
+
+<!-- Form -->
+<form action="/add-birthday" method="post">
+  <div class="mb-3">
+    <input
+      autocomplete="off"
+      autofocus
+      class="form-control mx-auto w-auto"
+      id="first-name"
+      name="first-name"
+      placeholder="First name"
+      type="text"
+    />
+  </div>
+  <div class="mb-3">
+    <input
+      autocomplete="off"
+      class="form-control mx-auto w-auto"
+      id="birth_date"
+      name="birth_date"
+      type="date"
+    />
+  </div>
+  <button class="btn btn-dark" type="submit">Add Birthday</button>
+</form>
+{% endblock %}
