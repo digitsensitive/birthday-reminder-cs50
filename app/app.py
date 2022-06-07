@@ -1,10 +1,11 @@
 from flask import Flask, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
+from helpers import split_date
 from database import MySQL
 import datetime
 
-import sys
+# import sys
 # print(row, file=sys.stderr)
 
 # Create a Flash instance
@@ -45,8 +46,6 @@ def index():
             birth_date = datetime.date(today.year+1, b[3].month, b[3].day)
             days_until_birthday = birth_date - today
 
-       # print(days_until_birthday, file=sys.stderr)
-
         birthdays_dict.append({'name': b[2],
                                'birth_date': b[3], 'days_until_birthday': days_until_birthday.days})
 
@@ -70,16 +69,51 @@ def add_birthday():
         if not birth_date:
             return render_template("add-birthday.html", error_message="Missing birthday. ")
 
+        split_birth_date = split_date(birth_date)
+
         # Add birthday to database
         new_birthday = (
-            "INSERT INTO birthdays (user_id, name, birth_date) VALUES(%s, %s, %s)")
-        data = (session["user_id"], first_name, birth_date)
+            "INSERT INTO birthdays (user_id, name, birth_date, day, month, year) VALUES(%s, %s, %s, %s, %s, %s)")
+        data = (session["user_id"],
+                first_name,
+                birth_date,
+                split_birth_date['day'],
+                split_birth_date['month'],
+                split_birth_date['year'])
         cursor.execute(new_birthday, data)
         connection.commit()
 
         return redirect("/")
 
     return render_template("add-birthday.html")
+
+
+@app.route("/list-birthdays", methods=["GET"])
+def list_birthdays():
+
+    birthdays_sorted_by_month = []
+    # Querys
+    for i in range(1, 13):
+        query = ("SELECT * FROM birthdays WHERE month = %s ORDER BY month ASC")
+
+        cursor.execute(query, (i,))
+        birthdays_of_selected_month = cursor.fetchall()
+
+        birthdays_dict = []
+
+        datetime_object = datetime.datetime.strptime(str(i), "%m")
+        full_month_name = datetime_object.strftime("%B")
+        birthdays_dict.append({'current_month': full_month_name})
+        for b in birthdays_of_selected_month:
+            datetime_object = datetime.datetime.strptime(str(b[5]), "%m")
+            full_month_name = datetime_object.strftime("%B")
+            birthdays_dict.append({'name': b[2],
+                                   'birth_date': b[3],
+                                   'day': b[4],
+                                   'month': full_month_name})
+        birthdays_sorted_by_month.append(birthdays_dict)
+
+    return render_template("list-birthdays.html", birthdays_per_month=birthdays_sorted_by_month)
 
 
 @app.route("/login", methods=["GET", "POST"])

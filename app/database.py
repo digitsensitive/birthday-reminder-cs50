@@ -60,7 +60,10 @@ class MySQL:
             "`id` INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL, "
             "`user_id` INTEGER NOT NULL, "
             "`name` TEXT NOT NULL, "
-            "`birth_date` DATE NOT NULL"
+            "`birth_date` DATE NOT NULL, "
+            "`day` INTEGER NOT NULL, "
+            "`month` INTEGER NOT NULL, "
+            "`year` INTEGER NOT NULL"
             ")")
 
         cursor.close()

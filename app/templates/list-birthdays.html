@@ -1,0 +1,21 @@
+<!-- Extending Layout -->
+{% extends "layout.html" %}
+
+<!-- Block Title -->
+{% block title %} List Birthdays {% endblock %}
+
+<!-- Block Main -->
+{% block main %}
+
+<!-- Loop through birthday cards -->
+{% for birthdays in birthdays_per_month %}
+<ul class="list-group mx-auto mb-4" style="width: 240px">
+  {% for birthday in birthdays %} {% if loop.index == 1 %}
+  <label class="fw-bold">{{ birthday['current_month'] }}</label>
+  {% else %}
+  <li class="list-group-item">
+    {{ birthday['name'] }}, {{ birthday['day'] }}. {{ birthday['month'] }}
+  </li>
+  {% endif %} {% endfor %}
+</ul>
+{% endfor %} {% endblock %}
