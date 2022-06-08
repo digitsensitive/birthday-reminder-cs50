@@ -7,6 +7,11 @@
 <!-- Block Main -->
 {% block main %}
 
+<!-- Information if no birthdays exist -->
+{% if not birthdays %}
+<i class="bi bi-info-circle text-secondary"> No birthdays</i>
+{% endif %}
+
 <!-- Loop through birthday cards -->
 {% for birthday in birthdays %}
 <div class="card mx-auto mb-4" style="width: 240px">
