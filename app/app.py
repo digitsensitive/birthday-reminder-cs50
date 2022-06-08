@@ -1,15 +1,31 @@
+from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from helpers import split_date
 from database import MySQL
 import datetime
+from flask_mail import Mail, Message
 
-# import sys
+# import sys
 # print(row, file=sys.stderr)
 
 # Create a Flash instance
 app = Flask(__name__)
+
+mail_settings = {
+    "MAIL_SERVER": 'smtp.gmail.com',
+    "MAIL_PORT": 465,
+    "MAIL_USE_TLS": False,
+    "MAIL_USE_SSL": True,
+    "MAIL_USERNAME": "auto.birthday.reminder@gmail.com",
+    "MAIL_PASSWORD": "ikwrymusouahvuhi"
+}
+
+app.config.update(mail_settings)
+
+# Mail
+mail = Mail(app)
 
 # Create a connection and cursor object to represent the database
 mysql = MySQL(app)
@@ -19,14 +35,37 @@ cursor = connection.cursor(buffered=True)
 # Configure Sessions
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+
+
 Session(app)
+
+
+def job():
+   # query = ("SELECT * FROM birthdays")
+
+    # cursor.execute(query)
+    # birthdays_of_selected_month = cursor.fetchall()
+
+    # App Context:
+    # https://stackoverflow.com/questions/40117324/querying-model-in-flask-apscheduler-job-raises-app-context-runtimeerror
+    with app.app_context():
+        msg = Message(subject="Hello",
+                      sender=app.config.get("MAIL_USERNAME"),
+                      recipients=["caviezelkuhn@gmail.com"],
+                      body="This is a test email I sent with Gmail and Python!")
+        mail.send(msg)
+
+
+scheduler = BackgroundScheduler()
+scheduler.start()
+# job = scheduler.add_job(job, 'interval', seconds=5)
 
 
 @app.route("/")
 def index():
 
     # Query
-    query = ("SELECT * FROM birthdays LIMIT 3")
+    query = ("SELECT * FROM birthdays WHERE display_on_main_page=1 LIMIT 3")
     cursor.execute(query)
     birthdays = cursor.fetchall()
 
@@ -58,8 +97,10 @@ def add_birthday():
     if request.method == "POST":
 
         # Get the form data
-        first_name = request.form.get("first-name")
-        birth_date = request.form.get("birth_date")
+        first_name = request.form.get("firstName")
+        birth_date = request.form.get("birthDate")
+        display_on_main_page = 'displayOnMainPage' in request.form
+        email_notification = 'automaticEmailNotification' in request.form
 
         # Check if a first name was entered
         if not first_name:
@@ -73,13 +114,15 @@ def add_birthday():
 
         # Add birthday to database
         new_birthday = (
-            "INSERT INTO birthdays (user_id, name, birth_date, day, month, year) VALUES(%s, %s, %s, %s, %s, %s)")
+            "INSERT INTO birthdays (user_id, name, birth_date, day, month, year, display_on_main_page, email_notification) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)")
         data = (session["user_id"],
                 first_name,
                 birth_date,
                 split_birth_date['day'],
                 split_birth_date['month'],
-                split_birth_date['year'])
+                split_birth_date['year'],
+                display_on_main_page,
+                email_notification)
         cursor.execute(new_birthday, data)
         connection.commit()
 

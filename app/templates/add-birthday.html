@@ -19,8 +19,8 @@
       autocomplete="off"
       autofocus
       class="form-control mx-auto w-auto"
-      id="first-name"
-      name="first-name"
+      id="firstName"
+      name="firstName"
       placeholder="First name"
       type="text"
     />
@@ -29,10 +29,32 @@
     <input
       autocomplete="off"
       class="form-control mx-auto w-auto"
-      id="birth_date"
-      name="birth_date"
+      id="birthDate"
+      name="birthDate"
       type="date"
     />
+  </div>
+  <div class="mb-3">
+    <input
+      class="form-check-input"
+      id="displayOnMainPage"
+      name="displayOnMainPage"
+      type="checkbox"
+    />
+    <label class="form-check-label" for="displayOnMainPage">
+      Display on main page
+    </label>
+  </div>
+  <div class="mb-3">
+    <input
+      class="form-check-input"
+      id="automaticEmailNotification"
+      name="automaticEmailNotification"
+      type="checkbox"
+    />
+    <label class="form-check-label" for="automaticEmailNotification">
+      Automatic email notification
+    </label>
   </div>
   <button class="btn btn-dark" type="submit">Add Birthday</button>
 </form>

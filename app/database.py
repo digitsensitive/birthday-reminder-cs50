@@ -63,7 +63,9 @@ class MySQL:
             "`birth_date` DATE NOT NULL, "
             "`day` INTEGER NOT NULL, "
             "`month` INTEGER NOT NULL, "
-            "`year` INTEGER NOT NULL"
+            "`year` INTEGER NOT NULL, "
+            "`display_on_main_page` BOOLEAN NOT NULL, "
+            "`email_notification` BOOLEAN NOT NULL"
             ")")
 
         cursor.close()
