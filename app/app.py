@@ -1,7 +1,7 @@
-from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
+from scheduler import BirthdayReminderScheduler
 from helpers import split_date
 from database import MySQL
 import datetime
@@ -39,9 +39,11 @@ app.config["SESSION_TYPE"] = "filesystem"
 
 Session(app)
 
+# Event to send mail, which is triggered every 24 hours
 
-def job():
-   # query = ("SELECT * FROM birthdays")
+
+def send_mail():
+    # query = ("SELECT * FROM birthdays")
 
     # cursor.execute(query)
     # birthdays_of_selected_month = cursor.fetchall()
@@ -49,16 +51,18 @@ def job():
     # App Context:
     # https://stackoverflow.com/questions/40117324/querying-model-in-flask-apscheduler-job-raises-app-context-runtimeerror
     with app.app_context():
-        msg = Message(subject="Hello",
+        msg = Message(subject="Geburtstagserinnerung",
                       sender=app.config.get("MAIL_USERNAME"),
                       recipients=["caviezelkuhn@gmail.com"],
                       body="This is a test email I sent with Gmail and Python!")
         mail.send(msg)
 
 
-scheduler = BackgroundScheduler()
-scheduler.start()
-# job = scheduler.add_job(job, 'interval', seconds=5)
+# Add a BackgroundScheduler with Advanced Python Scheduler
+# Event is triggered every 24 hours
+# https://apscheduler.readthedocs.io
+scheduler = BirthdayReminderScheduler(True)
+scheduler.add_job(send_mail, 24)
 
 
 @app.route("/")
