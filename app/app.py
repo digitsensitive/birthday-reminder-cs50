@@ -86,7 +86,8 @@ def index():
             days_until_birthday = birth_date - today
 
         birthdays_dict.append({'name': b[2],
-                               'birth_date': b[3], 'days_until_birthday': days_until_birthday.days})
+                               'birth_date': b[3],
+                               'days_until_birthday': days_until_birthday.days})
 
     birthdays_dict.sort(key=lambda x: x['days_until_birthday'])
     return render_template("index.html", birthdays=birthdays_dict)
@@ -131,7 +132,7 @@ def add_birthday():
     return render_template("add-birthday.html")
 
 
-@app.route('/edit/<int:id>', methods=('GET', 'POST'))
+@app.route('/edit/<int:id>', methods=["GET", "POST"])
 def edit(id):
     if request.method == "POST":
 
@@ -178,6 +179,16 @@ def edit(id):
                          'email_notification': birthday[8]}
 
         return render_template('edit-birthday.html', birthday=birthday_dict)
+
+
+@app.route('/delete/<int:id>', methods=["GET"])
+def delete(id):
+
+    if request.method == "GET":
+        query = ("DELETE FROM birthdays WHERE id = %s")
+        cursor.execute(query, (id,))
+        connection.commit()
+        return redirect('/list-birthdays')
 
 
 @app.route("/list-birthdays", methods=["GET"])

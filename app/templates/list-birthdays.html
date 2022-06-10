@@ -9,13 +9,18 @@
 
 <!-- Loop through birthday cards -->
 {% for birthdays in birthdays_per_month %}
-<ul class="list-group mx-auto mb-4" style="width: 240px">
+<ul class="list-group list-group-flush mx-auto mb-4" style="width: 240px">
   {% for birthday in birthdays %} {% if loop.index == 1 %}
   <label class="fw-bold">{{ birthday['current_month'] }}</label>
   {% else %}
   <li class="list-group-item">
-    <a href="{{ url_for('edit', id=birthday['id']) }}">{{ birthday['name'] }}</a
-    >, {{ birthday['day'] }}. {{ birthday['month'] }}
+    {{ birthday['name'] }}, {{ birthday['day'] }}. {{ birthday['month'] }}
+    <a href="{{ url_for('edit', id=birthday['id']) }}"
+      ><i class="bi bi-pencil"></i
+    ></a>
+    <a href="{{ url_for('delete', id=birthday['id']) }}"
+      ><i class="bi bi-x-lg"></i
+    ></a>
   </li>
   {% endif %} {% endfor %}
 </ul>
