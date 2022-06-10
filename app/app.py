@@ -131,6 +131,55 @@ def add_birthday():
     return render_template("add-birthday.html")
 
 
+@app.route('/edit/<int:id>', methods=('GET', 'POST'))
+def edit(id):
+    if request.method == "POST":
+
+        # Get the form data
+        first_name = request.form.get("firstName")
+        birth_date = request.form.get("birthDate")
+        display_on_main_page = 'displayOnMainPage' in request.form
+        email_notification = 'automaticEmailNotification' in request.form
+
+        # Check if a first name was entered
+        if not first_name:
+            return render_template("edit-birthday.html", error_message="Missing first name. ")
+
+        # Check if a birthday was entered
+        if not birth_date:
+            return render_template("edit-birthday.html", error_message="Missing birthday. ")
+
+        split_birth_date = split_date(birth_date)
+
+        # Add birthday to database
+        new_birthday = (
+            "UPDATE birthdays SET name = %s, birth_date = %s, day = %s, month = %s, year = %s, display_on_main_page = %s, email_notification = %s WHERE id = %s")
+        data = (first_name,
+                birth_date,
+                split_birth_date['day'],
+                split_birth_date['month'],
+                split_birth_date['year'],
+                display_on_main_page,
+                email_notification,
+                id)
+        cursor.execute(new_birthday, data)
+        connection.commit()
+        return redirect("/list-birthdays")
+
+    if request.method == "GET":
+        query = ("SELECT * FROM birthdays WHERE id = %s")
+        cursor.execute(query, (id,))
+        birthday = cursor.fetchone()
+
+        birthday_dict = {'id': birthday[0],
+                         'name': birthday[2],
+                         'birth_date': birthday[3],
+                         'display_on_main_page': birthday[7],
+                         'email_notification': birthday[8]}
+
+        return render_template('edit-birthday.html', birthday=birthday_dict)
+
+
 @app.route("/list-birthdays", methods=["GET"])
 def list_birthdays():
 
@@ -150,7 +199,8 @@ def list_birthdays():
         for b in birthdays_of_selected_month:
             datetime_object = datetime.datetime.strptime(str(b[5]), "%m")
             full_month_name = datetime_object.strftime("%B")
-            birthdays_dict.append({'name': b[2],
+            birthdays_dict.append({'id': b[0],
+                                   'name': b[2],
                                    'birth_date': b[3],
                                    'day': b[4],
                                    'month': full_month_name})

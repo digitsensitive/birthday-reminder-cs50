@@ -1,0 +1,57 @@
+<!-- Extending Layout -->
+{% extends "layout.html" %}
+
+<!-- Block Title -->
+{% block title %} Edit Birthday {% endblock %}
+
+<!-- Block Main -->
+{% block main %}
+
+<!-- Display Error Message -->
+{% if error_message %}
+<div class="alert alert-danger" role="alert">{{ error_message }}</div>
+{% endif %}
+
+<!-- Form -->
+<form action="/edit/{{birthday['id']}}" method="post">
+  <div class="mb-3">
+    <input
+      autocomplete="off"
+      autofocus
+      class="form-control mx-auto w-auto"
+      id="firstName"
+      name="firstName"
+      placeholder="First name"
+      type="text"
+      value="{{ birthday['name'] }}"
+    />
+  </div>
+  <div class="mb-3">
+    <input
+      autocomplete="off"
+      class="form-control mx-auto w-auto"
+      id="birthDate"
+      name="birthDate"
+      type="date"
+      value="{{ birthday['birth_date'] }}"
+    />
+  </div>
+  <div class="mb-3">
+    <input {{ "checked" if birthday['display_on_main_page'] else "" }}
+    class="form-check-input" id="displayOnMainPage" name="displayOnMainPage"
+    type="checkbox" />
+    <label class="form-check-label" for="displayOnMainPage">
+      Display on main page
+    </label>
+  </div>
+  <div class="mb-3">
+    <input {{ "checked" if birthday['email_notification'] else "" }}
+    class="form-check-input" id="automaticEmailNotification"
+    name="automaticEmailNotification" type="checkbox" />
+    <label class="form-check-label" for="automaticEmailNotification">
+      Automatic email notification
+    </label>
+  </div>
+  <button class="btn btn-dark" type="submit">Edit Birthday</button>
+</form>
+{% endblock %}

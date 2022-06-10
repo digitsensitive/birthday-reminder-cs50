@@ -14,7 +14,8 @@
   <label class="fw-bold">{{ birthday['current_month'] }}</label>
   {% else %}
   <li class="list-group-item">
-    {{ birthday['name'] }}, {{ birthday['day'] }}. {{ birthday['month'] }}
+    <a href="{{ url_for('edit', id=birthday['id']) }}">{{ birthday['name'] }}</a
+    >, {{ birthday['day'] }}. {{ birthday['month'] }}
   </li>
   {% endif %} {% endfor %}
 </ul>
