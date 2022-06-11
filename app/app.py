@@ -3,7 +3,7 @@ import datetime
 from flask import Flask, redirect, render_template, request, session
 from flask_mail import Mail, Message
 from flask_session import Session
-from helpers import split_date
+from helpers import login_required, split_date
 import os
 from scheduler import BirthdayReminderScheduler
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -56,8 +56,8 @@ scheduler.add_job(send_mail, 24)
 
 
 @app.route("/")
+@login_required
 def index():
-
     # Query
     query = ("SELECT * FROM birthdays WHERE display_on_main_page=1 LIMIT 3")
     cursor.execute(query)
@@ -88,6 +88,7 @@ def index():
 
 
 @app.route("/add-birthday", methods=["GET", "POST"])
+@login_required
 def add_birthday():
     if request.method == "POST":
 
@@ -127,6 +128,7 @@ def add_birthday():
 
 
 @app.route('/edit/<int:id>', methods=["GET", "POST"])
+@login_required
 def edit(id):
     if request.method == "POST":
 
@@ -176,6 +178,7 @@ def edit(id):
 
 
 @app.route('/delete/<int:id>', methods=["GET"])
+@login_required
 def delete(id):
 
     if request.method == "GET":
@@ -186,6 +189,7 @@ def delete(id):
 
 
 @app.route("/list-birthdays", methods=["GET"])
+@login_required
 def list_birthdays():
 
     birthdays_sorted_by_month = []
@@ -254,6 +258,7 @@ def login():
 
 
 @app.route("/logout")
+@login_required
 def logout():
     session.clear()
     return redirect("/")
