@@ -1,45 +1,35 @@
-from flask import Flask, redirect, render_template, request, session
-from flask_session import Session
-from werkzeug.security import check_password_hash, generate_password_hash
-from scheduler import BirthdayReminderScheduler
-from helpers import split_date
 from database import MySQL
 import datetime
+from flask import Flask, redirect, render_template, request, session
 from flask_mail import Mail, Message
+from flask_session import Session
+from helpers import split_date
+import os
+from scheduler import BirthdayReminderScheduler
+from werkzeug.security import check_password_hash, generate_password_hash
 
-# import sys
-# print(row, file=sys.stderr)
-
-# Create a Flash instance
+# Init Flask instance
 app = Flask(__name__)
 
-mail_settings = {
-    "MAIL_SERVER": 'smtp.gmail.com',
-    "MAIL_PORT": 465,
-    "MAIL_USE_TLS": False,
-    "MAIL_USE_SSL": True,
-    "MAIL_USERNAME": "auto.birthday.reminder@gmail.com",
-    "MAIL_PASSWORD": "ikwrymusouahvuhi"
-}
+# Loop through mapping object of process environment
+# https://docs.python.org/3/library/os.html#os.environ
+for key, value in os.environ.items():
+    # Get the keys with the prefix BR_, which stands for
+    # the app name (Birthday reminder) and set it in the app config
+    if key.startswith("BR_"):
+        env_name = key.split("BR_")[1]
+        app.config[env_name] = value
 
-app.config.update(mail_settings)
-
-# Mail
+# Init Mail instance
 mail = Mail(app)
+
+# Init Session
+Session(app)
 
 # Create a connection and cursor object to represent the database
 mysql = MySQL(app)
 connection = mysql.get_connection("birthday_reminder")
 cursor = connection.cursor(buffered=True)
-
-# Configure Sessions
-app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
-
-
-Session(app)
-
-# Event to send mail, which is triggered every 24 hours
 
 
 def send_mail():

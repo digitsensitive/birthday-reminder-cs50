@@ -13,7 +13,6 @@ services:
     # Short syntax (VOLUME:CONTAINER_PATH) to specify volume mount
     volumes:
       - ./app:/app
-
   mysqldb:
     # Here we define an image, which is pulled from Hub
     image: mysql
@@ -26,7 +25,6 @@ services:
     volumes:
       - mysql:/var/lib/mysql
       - mysql_config:/etc/mysql
-
 volumes:
   mysql:
   mysql_config:
