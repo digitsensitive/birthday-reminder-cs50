@@ -6,6 +6,7 @@ class MySQL:
     def __init__(self, app):
         self.app = app
         self.host = "mysqldb"
+        self.port = 3306
         self.user = "root"
         self.password = "p@ssw0rd1"
         self.init()
@@ -15,12 +16,14 @@ class MySQL:
             if database is None:
                 return mysql.connector.connect(
                     host=self.host,
+                    port=self.port,
                     user=self.user,
                     password=self.password
                 )
             else:
                 return mysql.connector.connect(
                     host=self.host,
+                    port=self.port,
                     user=self.user,
                     password=self.password,
                     database=database

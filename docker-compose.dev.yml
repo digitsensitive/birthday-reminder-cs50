@@ -18,11 +18,11 @@ services:
   mysqldb:
     # Here we define an image, which is pulled from Hub
     image: mysql
+    env_file:
+      - "database.env"
     # Define host and container port
     ports:
       - 3306:3306
-    environment:
-      - MYSQL_ROOT_PASSWORD=p@ssw0rd1
     # Short syntax (VOLUME:CONTAINER_PATH) to specify volume mount
     volumes:
       - mysql:/var/lib/mysql
