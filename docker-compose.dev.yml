@@ -13,6 +13,8 @@ services:
     # Short syntax (VOLUME:CONTAINER_PATH) to specify volume mount
     volumes:
       - ./app:/app
+    # https://docs.docker.com/compose/startup-order
+    command: ["./wait-for-it.sh", "mysqldb:3306", "--", "python3", "app.py"]
   mysqldb:
     # Here we define an image, which is pulled from Hub
     image: mysql

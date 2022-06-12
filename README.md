@@ -123,6 +123,12 @@ To connect to the MySQL interactive terminal use the following command:
 docker exec -ti mysqldb mysql -u root -p
 ```
 
+If successfully connected navigate to database as follows:
+
+```
+USE datbase_name;
+```
+
 ### Add application container to the database network and run it
 
 This allows us to access the database by its container name.
