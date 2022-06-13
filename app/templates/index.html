@@ -34,7 +34,17 @@
     ></div>
   </div>
   <div class="card-footer text-muted">
+    {% if birthday['days_until_birthday'] == 0 %}
+    Happy {{ birthday['age'] }} Anniversary
+    <img
+            alt=""
+            height="24"
+            src="/static/party_popper.png"
+            width="24"
+          /> 
+    {% else %}
     turns {{ birthday['age'] }} in {{ birthday['days_until_birthday'] }} days
+    {% endif %}
   </div>
 </div>
 {% endfor %} {% endblock %}
