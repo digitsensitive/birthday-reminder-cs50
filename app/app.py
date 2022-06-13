@@ -59,7 +59,7 @@ scheduler.add_job(send_mail, 24)
 @login_required
 def index():
     # Query
-    query = ("SELECT * FROM birthdays WHERE display_on_main_page=1 LIMIT 3")
+    query = ("SELECT * FROM birthdays WHERE display_on_main_page=1 LIMIT 5")
     cursor.execute(query)
     birthdays = cursor.fetchall()
 
@@ -72,16 +72,25 @@ def index():
 
         birth_date = datetime.date(today.year, b[3].month, b[3].day)
         days_until_birthday = 0
+        age = 0
         if today <= birth_date:
             birth_date = datetime.date(today.year, b[3].month, b[3].day)
             days_until_birthday = birth_date - today
+            age = today.year - b[3].year
         elif today > birth_date:
             birth_date = datetime.date(today.year+1, b[3].month, b[3].day)
             days_until_birthday = birth_date - today
+            age = today.year - b[3].year+1
 
         birthdays_dict.append({'name': b[2],
                                'birth_date': b[3],
-                               'days_until_birthday': days_until_birthday.days})
+                               'gender': b[4],
+                               'day': b[3].day,
+                               'month': b[3].month,
+                               'year': b[3].year,
+                               'age': age,
+                               'days_until_birthday': days_until_birthday.days,
+                               'percentage': 100-0.274*days_until_birthday.days})
 
     birthdays_dict.sort(key=lambda x: x['days_until_birthday'])
     return render_template("index.html", birthdays=birthdays_dict)
@@ -95,6 +104,7 @@ def add_birthday():
         # Get the form data
         first_name = request.form.get("firstName")
         birth_date = request.form.get("birthDate")
+        gender = request.form['genderSelection']
         display_on_main_page = 'displayOnMainPage' in request.form
         email_notification = 'automaticEmailNotification' in request.form
 
@@ -110,10 +120,11 @@ def add_birthday():
 
         # Add birthday to database
         new_birthday = (
-            "INSERT INTO birthdays (user_id, name, birth_date, day, month, year, display_on_main_page, email_notification) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)")
+            "INSERT INTO birthdays (user_id, name, birth_date, gender, day, month, year, display_on_main_page, email_notification) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)")
         data = (session["user_id"],
                 first_name,
                 birth_date,
+                gender,
                 split_birth_date['day'],
                 split_birth_date['month'],
                 split_birth_date['year'],
@@ -135,6 +146,7 @@ def edit(id):
         # Get the form data
         first_name = request.form.get("firstName")
         birth_date = request.form.get("birthDate")
+        gender = request.form['genderSelection']
         display_on_main_page = 'displayOnMainPage' in request.form
         email_notification = 'automaticEmailNotification' in request.form
 
@@ -150,9 +162,10 @@ def edit(id):
 
         # Add birthday to database
         new_birthday = (
-            "UPDATE birthdays SET name = %s, birth_date = %s, day = %s, month = %s, year = %s, display_on_main_page = %s, email_notification = %s WHERE id = %s")
+            "UPDATE birthdays SET name = %s, birth_date = %s, gender = %s, day = %s, month = %s, year = %s, display_on_main_page = %s, email_notification = %s WHERE id = %s")
         data = (first_name,
                 birth_date,
+                gender,
                 split_birth_date['day'],
                 split_birth_date['month'],
                 split_birth_date['year'],
@@ -171,8 +184,9 @@ def edit(id):
         birthday_dict = {'id': birthday[0],
                          'name': birthday[2],
                          'birth_date': birthday[3],
-                         'display_on_main_page': birthday[7],
-                         'email_notification': birthday[8]}
+                         'gender': birthday[4],
+                         'display_on_main_page': birthday[8],
+                         'email_notification': birthday[9]}
 
         return render_template('edit-birthday.html', birthday=birthday_dict)
 
@@ -206,12 +220,12 @@ def list_birthdays():
         full_month_name = datetime_object.strftime("%B")
         birthdays_dict.append({'current_month': full_month_name})
         for b in birthdays_of_selected_month:
-            datetime_object = datetime.datetime.strptime(str(b[5]), "%m")
+            datetime_object = datetime.datetime.strptime(str(b[6]), "%m")
             full_month_name = datetime_object.strftime("%B")
             birthdays_dict.append({'id': b[0],
                                    'name': b[2],
                                    'birth_date': b[3],
-                                   'day': b[4],
+                                   'day': b[5],
                                    'month': full_month_name})
         birthdays_sorted_by_month.append(birthdays_dict)
 

@@ -64,6 +64,7 @@ class MySQL:
             "`user_id` INTEGER NOT NULL, "
             "`name` TEXT NOT NULL, "
             "`birth_date` DATE NOT NULL, "
+            "`gender` ENUM('m','f'), "
             "`day` INTEGER NOT NULL, "
             "`month` INTEGER NOT NULL, "
             "`year` INTEGER NOT NULL, "

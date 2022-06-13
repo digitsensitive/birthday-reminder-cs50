@@ -36,6 +36,18 @@
       value="{{ birthday['birth_date'] }}"
     />
   </div>
+  <div class="mb-3 form-check-inline">
+    <input {{ "checked" if birthday['gender']=='m' else "" }}
+    class="form-check-input" id="genderMale" name="genderSelection" type="radio"
+    value="m" />
+    <label class="form-check-label" for="genderMale"> Male </label>
+  </div>
+  <div class="mb-3 form-check-inline">
+    <input {{ "checked" if birthday['gender']=='f' else "" }}
+    class="form-check-input" id="genderFemale" name="genderSelection"
+    type="radio" value="f" />
+    <label class="form-check-label" for="genderFemale"> Female </label>
+  </div>
   <div class="mb-3">
     <input {{ "checked" if birthday['display_on_main_page'] else "" }}
     class="form-check-input" id="displayOnMainPage" name="displayOnMainPage"
