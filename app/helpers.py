@@ -1,13 +1,21 @@
+import datetime
 from flask import redirect, session
 from functools import wraps
 
 
+def get_month_name(month: int):
+    """
+    Convert month int to string.
+    """
+    datetime_object = datetime.datetime.strptime(str(month), "%m")
+    return datetime_object.strftime("%B")
+
+
 def split_date(date):
     """
-    Split date YYYY-MM-DD into seperate values 
-
+    Split date YYYY-MM-DD into seperate values.
     As a return value you get a dictionary with three key-value pairs:
-    Keys: day, month and year
+    Keys: day, month and year.
     """
 
     # Split the date using the string split method with the separator -
@@ -20,7 +28,6 @@ def split_date(date):
 def login_required(f):
     """
     Decorate routes to require login.
-
     https://flask.palletsprojects.com/en/2.0.x/patterns/viewdecorators
     """
     @wraps(f)
