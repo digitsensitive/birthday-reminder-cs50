@@ -322,4 +322,9 @@ def register():
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    # https://flask.palletsprojects.com/en/2.1.x/api/#application-object
+    # Host:
+    # Set to '0.0.0.0' makes the server available externally as well.
+    # Debug:
+    # Set to True so the server will automatically reload for code changes
+    app.run(host='0.0.0.0', debug=True)
