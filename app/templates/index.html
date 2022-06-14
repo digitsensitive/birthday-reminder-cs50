@@ -19,7 +19,7 @@
   <div class="card-body">
     <i class="{{ "bi bi-gender-male" if birthday['gender']=='m' else "bi bi-gender-female" }}"></i>
     <h5 class="{{ "card-title text-primary" if birthday['gender']=='m' else "card-title text-danger" }}">{{ birthday['name'] }}</h5>
-    <p class="card-text">born {{ birthday['day'] }}.{{ birthday['month'] }}.{{ birthday['year'] }}</p>
+    <p class="card-text">born {{ birthday['birth_date'].day }}.{{ birthday['birth_date'].month }}.{{ birthday['birth_date'].year }}</p>
   </div>
 
   <div class="progress" style="height: 5px; border-radius: 0px">

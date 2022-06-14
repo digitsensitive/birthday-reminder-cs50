@@ -3,7 +3,7 @@ import datetime
 from flask import Flask, redirect, render_template, request, session
 from flask_mail import Mail, Message
 from flask_session import Session
-from helpers import login_required, split_date
+from helpers import get_month_name, login_required
 import os
 from scheduler import BirthdayReminderScheduler
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -58,42 +58,51 @@ scheduler.add_job(send_mail, 24)
 @app.route("/")
 @login_required
 def index():
-    # Query
-    query = ("SELECT * FROM birthdays WHERE display_on_main_page=1 LIMIT 5")
+    # Get birthdays where display on main page is True and limit to 5 entries
+    query = ("SELECT * FROM birthdays WHERE display_on_main_page = 1 LIMIT 5")
     cursor.execute(query)
     birthdays = cursor.fetchall()
 
     # Get the current date for calculation of days until birthday
     today = datetime.date.today()
 
-    # Create array
-    birthdays_dict = []
-    for b in birthdays:
+    # Create empty birthday array
+    birthdays_array = []
 
-        birth_date = datetime.date(today.year, b[3].month, b[3].day)
+    # Loop through selected birthdays
+    for birthday in birthdays:
+
+        # Set variables
         days_until_birthday = 0
-        age = 0
-        if today <= birth_date:
-            birth_date = datetime.date(today.year, b[3].month, b[3].day)
-            days_until_birthday = birth_date - today
-            age = today.year - b[3].year
-        elif today > birth_date:
-            birth_date = datetime.date(today.year+1, b[3].month, b[3].day)
-            days_until_birthday = birth_date - today
-            age = today.year - b[3].year+1
+        current_age = 0
+        percentage_until_birthday = 0
 
-        birthdays_dict.append({'name': b[2],
-                               'birth_date': b[3],
-                               'gender': b[4],
-                               'day': b[3].day,
-                               'month': b[3].month,
-                               'year': b[3].year,
-                               'age': age,
-                               'days_until_birthday': days_until_birthday.days,
-                               'percentage': 100-0.274*days_until_birthday.days})
+        # Calculate date of the next birthday
+        next_birth_date = datetime.date(
+            today.year, birthday[3].month, birthday[3].day)
 
-    birthdays_dict.sort(key=lambda x: x['days_until_birthday'])
-    return render_template("index.html", birthdays=birthdays_dict)
+        # Evaluate for current year if the birthday has passed or not
+        if today <= next_birth_date:
+            # For the current year the birthday is upcoming
+            current_age = today.year - birthday[3].year
+        elif today > next_birth_date:
+            # For the current year the birthday has passed already
+            next_birth_date = datetime.date(
+                today.year+1, birthday[3].month, birthday[3].day)
+            current_age = today.year - birthday[3].year+1
+
+        days_until_birthday = (next_birth_date - today).days
+        percentage_until_birthday = 100-0.274*days_until_birthday
+
+        birthdays_array.append({'name': birthday[2],
+                                'birth_date': birthday[3],
+                                'gender': birthday[4],
+                                'age': current_age,
+                                'days_until_birthday': days_until_birthday,
+                                'percentage': percentage_until_birthday})
+
+    birthdays_array.sort(key=lambda x: x['days_until_birthday'])
+    return render_template("index.html", birthdays=birthdays_array)
 
 
 @app.route("/add-birthday", methods=["GET", "POST"])
@@ -116,18 +125,13 @@ def add_birthday():
         if not birth_date:
             return render_template("add-birthday.html", error_message="Missing birthday. ")
 
-        split_birth_date = split_date(birth_date)
-
         # Add birthday to database
         new_birthday = (
-            "INSERT INTO birthdays (user_id, name, birth_date, gender, day, month, year, display_on_main_page, email_notification) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)")
+            "INSERT INTO birthdays (user_id, name, birth_date, gender, display_on_main_page, email_notification) VALUES(%s, %s, %s, %s, %s, %s)")
         data = (session["user_id"],
                 first_name,
                 birth_date,
                 gender,
-                split_birth_date['day'],
-                split_birth_date['month'],
-                split_birth_date['year'],
                 display_on_main_page,
                 email_notification)
         cursor.execute(new_birthday, data)
@@ -158,22 +162,18 @@ def edit(id):
         if not birth_date:
             return render_template("edit-birthday.html", error_message="Missing birthday. ")
 
-        split_birth_date = split_date(birth_date)
-
         # Add birthday to database
         new_birthday = (
-            "UPDATE birthdays SET name = %s, birth_date = %s, gender = %s, day = %s, month = %s, year = %s, display_on_main_page = %s, email_notification = %s WHERE id = %s")
+            "UPDATE birthdays SET name = %s, birth_date = %s, gender = %s, display_on_main_page = %s, email_notification = %s WHERE id = %s")
         data = (first_name,
                 birth_date,
                 gender,
-                split_birth_date['day'],
-                split_birth_date['month'],
-                split_birth_date['year'],
                 display_on_main_page,
                 email_notification,
                 id)
         cursor.execute(new_birthday, data)
         connection.commit()
+
         return redirect("/list-birthdays")
 
     if request.method == "GET":
@@ -185,8 +185,8 @@ def edit(id):
                          'name': birthday[2],
                          'birth_date': birthday[3],
                          'gender': birthday[4],
-                         'display_on_main_page': birthday[8],
-                         'email_notification': birthday[9]}
+                         'display_on_main_page': birthday[5],
+                         'email_notification': birthday[6]}
 
         return render_template('edit-birthday.html', birthday=birthday_dict)
 
@@ -194,40 +194,47 @@ def edit(id):
 @app.route('/delete/<int:id>', methods=["GET"])
 @login_required
 def delete(id):
-
-    if request.method == "GET":
-        query = ("DELETE FROM birthdays WHERE id = %s")
-        cursor.execute(query, (id,))
-        connection.commit()
-        return redirect('/list-birthdays')
+    query = ("DELETE FROM birthdays WHERE id = %s")
+    cursor.execute(query, (id,))
+    connection.commit()
+    return redirect('/list-birthdays')
 
 
 @app.route("/list-birthdays", methods=["GET"])
 @login_required
 def list_birthdays():
 
+    # Create empty array for birthdays
     birthdays_sorted_by_month = []
-    # Querys
-    for i in range(1, 13):
-        query = ("SELECT * FROM birthdays WHERE month = %s ORDER BY month ASC")
 
+    # Loop through the 12 months (1, 2, 3, ..., 12)
+    for i in range(1, 13):
+        # Create empty array for birthdays of the current month
+        birthdays = []
+
+        # Get all the birthdays in the selected month and sort the birthday
+        # by the day (from early to late)
+        query = (
+            "SELECT * FROM birthdays WHERE MONTH(birth_date) = %s ORDER BY DAY(birth_date) ASC")
         cursor.execute(query, (i,))
         birthdays_of_selected_month = cursor.fetchall()
 
-        birthdays_dict = []
+        # Convert month int to full month name
+        full_month_name = get_month_name(str(i))
 
-        datetime_object = datetime.datetime.strptime(str(i), "%m")
-        full_month_name = datetime_object.strftime("%B")
-        birthdays_dict.append({'current_month': full_month_name})
-        for b in birthdays_of_selected_month:
-            datetime_object = datetime.datetime.strptime(str(b[6]), "%m")
-            full_month_name = datetime_object.strftime("%B")
-            birthdays_dict.append({'id': b[0],
-                                   'name': b[2],
-                                   'birth_date': b[3],
-                                   'day': b[5],
-                                   'month': full_month_name})
-        birthdays_sorted_by_month.append(birthdays_dict)
+        # Add month string to the dictionary
+        birthdays.append({'month': full_month_name})
+
+        # Loop over birthdays of the current month
+        for birthday in birthdays_of_selected_month:
+            # Append dictionary to array with id, name, birth date and month
+            birthdays.append({'id': birthday[0],
+                              'name': birthday[2],
+                              'birth_date': birthday[3],
+                              'month': full_month_name})
+
+        # Add birthdays array to the birthdays array sorted by month
+        birthdays_sorted_by_month.append(birthdays)
 
     return render_template("list-birthdays.html", birthdays_per_month=birthdays_sorted_by_month)
 
@@ -251,7 +258,7 @@ def login():
             return render_template("login.html", error_message="Missing password. ")
 
         # Query database for username
-        query = "SELECT * FROM users WHERE username=%s"
+        query = "SELECT * FROM users WHERE username = %s"
         cursor.execute(query, (username,))
         row = cursor.fetchone()
 
@@ -312,7 +319,7 @@ def register():
             return render_template("register.html", error_message="Passwords do not match. ")
 
         # Add user to database
-        user = ("INSERT INTO users (username, hash) VALUES(%s, %s)")
+        user = "INSERT INTO users (username, hash) VALUES(%s, %s)"
         data = (username, generate_password_hash(password))
         cursor.execute(user, data)
         connection.commit()

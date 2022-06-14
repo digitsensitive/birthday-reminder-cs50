@@ -7,14 +7,18 @@
 <!-- Block Main -->
 {% block main %}
 
-<!-- Loop through birthday cards -->
+<!-- Loop through birthdays array by month -->
 {% for birthdays in birthdays_per_month %}
 <ul class="list-group list-group-flush mx-auto mb-4" style="width: 240px">
-  {% for birthday in birthdays %} {% if loop.index == 1 %}
-  <label class="fw-bold">{{ birthday['current_month'] }}</label>
+  {% for birthday in birthdays %}
+  <!-- Print month as title if first element from birthdays selected -->
+  {% if loop.index == 1 %}
+  <label class="fw-bold">{{ birthday['month'] }}</label>
   {% else %}
+  <!-- If not the first element of birthdays selected, print birthday details -->
   <li class="list-group-item">
-    {{ birthday['name'] }}, {{ birthday['day'] }}. {{ birthday['month'] }}
+    {{ birthday['name'] }} - {{ birthday['birth_date'].day }}. {{
+    birthday['month'] }}
     <a href="{{ url_for('edit', id=birthday['id']) }}"
       ><i class="bi bi-pencil"></i
     ></a>
