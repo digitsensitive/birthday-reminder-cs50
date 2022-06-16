@@ -15,4 +15,5 @@ class BirthdayReminderScheduler:
         self.scheduler.start()
 
     def add_job(self, func: any, hours: int):
-        self.scheduler.add_job(func, 'interval', hours=hours)
+        self.scheduler.add_job(
+            func, 'interval', hours=hours, start_date='2021-06-17')

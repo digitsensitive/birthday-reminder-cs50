@@ -7,6 +7,7 @@ from helpers import get_month_name, login_required
 import os
 from scheduler import BirthdayReminderScheduler
 from werkzeug.security import check_password_hash, generate_password_hash
+import sys
 
 # Init Flask instance
 app = Flask(__name__)
@@ -33,19 +34,42 @@ cursor = connection.cursor(buffered=True)
 
 
 def send_mail():
-    # query = ("SELECT * FROM birthdays")
+    # Get all birthdays where email notification is enabled
+    query = "SELECT * FROM birthdays WHERE email_notification = 1"
+    cursor.execute(query)
+    birthdays = cursor.fetchall()
 
-    # cursor.execute(query)
-    # birthdays_of_selected_month = cursor.fetchall()
+    # Get the current date
+    today = datetime.date.today()
 
-    # App Context:
-    # https://stackoverflow.com/questions/40117324/querying-model-in-flask-apscheduler-job-raises-app-context-runtimeerror
-    with app.app_context():
-        msg = Message(subject="Geburtstagserinnerung",
-                      sender=app.config.get("MAIL_USERNAME"),
-                      recipients=["caviezelkuhn@gmail.com"],
-                      body="This is a test email I sent with Gmail and Python!")
-        mail.send(msg)
+    # Loop through birthdays
+    for birthday in birthdays:
+
+        current_age = 0
+        next_birth_date = datetime.date(
+            today.year, birthday[3].month, birthday[3].day)
+
+        reminder_days = datetime.timedelta(17)
+
+        # Evaluate for current year if the birthday has passed or not
+        if today <= next_birth_date:
+            # For the current year the birthday is upcoming
+            current_age = today.year - birthday[3].year
+        elif today > next_birth_date:
+            # For the current year the birthday has passed already
+            next_birth_date = datetime.date(
+                today.year+1, birthday[3].month, birthday[3].day)
+            current_age = today.year - birthday[3].year+1
+
+        if today+reminder_days == next_birth_date:
+            # App Context:
+            # https://stackoverflow.com/questions/40117324/querying-model-in-flask-apscheduler-job-raises-app-context-runtimeerror
+            with app.app_context():
+                msg = Message(subject=app.config.get("MAIL_SUBJECT"),
+                              sender=app.config.get("MAIL_USERNAME"),
+                              recipients=["caviezelkuhn@gmail.com"],
+                              body=birthday[2] + " will turn " + str(current_age) + " in 7 days!")
+                mail.send(msg)
 
 
 # Add a BackgroundScheduler with Advanced Python Scheduler
