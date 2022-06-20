@@ -148,7 +148,7 @@ use a Compose file: For example `docker-compose.dev.yml`.
 After setting up a Compose file, you can simply run the following command:
 
 ```
-docker-compose -f docker-compose.dev.yml up --build
+docker-compose -f docker-compose.yml up --build
 ```
 
 ## Python

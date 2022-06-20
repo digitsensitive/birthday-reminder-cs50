@@ -17,7 +17,7 @@ services:
     command: ["./wait-for-it.sh", "mysqldb:3306", "--", "python3", "app.py"]
   mysqldb:
     # Here we define an image, which is pulled from Hub
-    image: mysql
+    image: mariadb
     env_file:
       - "database.env"
     # Define host and container port

@@ -49,7 +49,7 @@ def send_mail():
         next_birth_date = datetime.date(
             today.year, birthday[3].month, birthday[3].day)
 
-        reminder_days = datetime.timedelta(17)
+        reminder_days = datetime.timedelta(7)
 
         # Evaluate for current year if the birthday has passed or not
         if today <= next_birth_date:
