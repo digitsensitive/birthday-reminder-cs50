@@ -7,6 +7,54 @@
 Birthday Reminder is a web application written in Python and Flask.
 Add birthdays of friends and family members easily and get email reminders automatically.
 
+Until now, the birthdays of my friends and family were recorded in my personal
+calendar. The problem was that I could not set reminders as I wanted and that my
+calendar was overfilled by these entries. Therefore, I wanted to write an
+application that would take care of the birthdays specifically and send me
+corresponding early reminders.
+
+From the technology side, I was interested in trying Python and Flask as an
+alternative to Javascript and Node.js. I also wanted to use Docker for the first
+time for my own project.
+
+The original plan was to host the Docker containers on Amazon. During the
+development I decided to rather install it locally on my Raspberry Pi. This gave
+me the opportunity to get to know Ubuntu Server for the first time.
+
+The project itself contains the following main files:
+
+- `app.py`: Main project source code
+- `database.py`: Setup of the database using the mysql-connector library
+- `helpers.py`: Helpers functions
+- `scheduler.py`: Setup of the background scheduler using the apscheduler library
+
+In the templates folder you find all the html templates.
+In the static folder you find the favicon, the main logo of the applications and
+the css styles.
+
+Important: To make the application work, you have to create an `app.env` and
+`database.env` file in the root folder.
+
+The `app.env` file must define the following configuration values:
+
+```
+BR_FLASK_ENV = 'development'
+BR_SESSION_TYPE = 'filesystem'
+BR_SESSION_PERMANENT = False
+BR_MAIL_SUBJECT = 'Birthday Reminder'
+BR_MAIL_SERVER = 'smtp.gmail.com'
+BR_MAIL_PORT = 465
+BR_MAIL_USE_SSL = True
+BR_MAIL_USERNAME = 'email.from.which.the.reminders.are.sent@gmail.com'
+BR_MAIL_PASSWORD = 'password'
+```
+
+The `database.env` file must define the following configuration value:
+
+```
+MYSQL_ROOT_PASSWORD = 'password'
+```
+
 # Notes
 
 ## Docker
