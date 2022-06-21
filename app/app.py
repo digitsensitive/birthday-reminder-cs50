@@ -30,14 +30,20 @@ Session(app)
 # Create a connection and cursor object to represent the database
 mysql = MySQL(app)
 connection = mysql.get_connection("birthday_reminder")
-cursor = connection.cursor(buffered=True)
 
 
 def send_mail():
+
+    # Create cursor
+    cursor = connection.cursor(buffered=True)
+
     # Get all birthdays where email notification is enabled
     query = "SELECT * FROM birthdays WHERE email_notification = 1"
     cursor.execute(query)
     birthdays = cursor.fetchall()
+
+    # Close cursor
+    cursor.close()
 
     # Get the current date
     today = datetime.date.today()
@@ -82,10 +88,16 @@ scheduler.add_job(send_mail, 24)
 @app.route("/")
 @login_required
 def index():
+    # Create cursor
+    cursor = connection.cursor(buffered=True)
+
     # Get birthdays where display on main page is True and limit to 5 entries
     query = ("SELECT * FROM birthdays WHERE display_on_main_page = 1 LIMIT 5")
     cursor.execute(query)
     birthdays = cursor.fetchall()
+
+    # Close cursor
+    cursor.close()
 
     # Get the current date for calculation of days until birthday
     today = datetime.date.today()
@@ -134,6 +146,9 @@ def index():
 def add_birthday():
     if request.method == "POST":
 
+        # Create cursor
+        cursor = connection.cursor(buffered=True)
+
         # Get the form data
         first_name = request.form.get("firstName")
         birth_date = request.form.get("birthDate")
@@ -161,6 +176,9 @@ def add_birthday():
         cursor.execute(new_birthday, data)
         connection.commit()
 
+        # Close cursor
+        cursor.close()
+
         return redirect("/")
 
     return render_template("add-birthday.html")
@@ -169,6 +187,10 @@ def add_birthday():
 @app.route('/edit/<int:id>', methods=["GET", "POST"])
 @login_required
 def edit(id):
+
+    # Create cursor
+    cursor = connection.cursor(buffered=True)
+
     if request.method == "POST":
 
         # Get the form data
@@ -214,19 +236,32 @@ def edit(id):
 
         return render_template('edit-birthday.html', birthday=birthday_dict)
 
+    # Close cursor
+    cursor.close()
+
 
 @app.route('/delete/<int:id>', methods=["GET"])
 @login_required
 def delete(id):
+    # Create cursor
+    cursor = connection.cursor(buffered=True)
+
     query = ("DELETE FROM birthdays WHERE id = %s")
     cursor.execute(query, (id,))
     connection.commit()
+
+    # Close cursor
+    cursor.close()
+
     return redirect('/list-birthdays')
 
 
 @app.route("/list-birthdays", methods=["GET"])
 @login_required
 def list_birthdays():
+
+    # Create cursor
+    cursor = connection.cursor(buffered=True)
 
     # Create empty array for birthdays
     birthdays_sorted_by_month = []
@@ -260,6 +295,9 @@ def list_birthdays():
         # Add birthdays array to the birthdays array sorted by month
         birthdays_sorted_by_month.append(birthdays)
 
+    # Close cursor
+    cursor.close()
+
     return render_template("list-birthdays.html", birthdays_per_month=birthdays_sorted_by_month)
 
 
@@ -268,6 +306,9 @@ def login():
     session.clear()
 
     if request.method == "POST":
+
+        # Create cursor
+        cursor = connection.cursor(buffered=True)
 
         # Get the form data
         username = request.form.get("username")
@@ -297,6 +338,9 @@ def login():
         # Remember which user has logged in
         session["user_id"] = row[0]
 
+        # Close cursor
+        cursor.close()
+
         return redirect("/")
 
     return render_template("login.html")
@@ -312,6 +356,9 @@ def logout():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+
+        # Create cursor
+        cursor = connection.cursor(buffered=True)
 
         # Get the form data
         username = request.form.get("username")
@@ -347,6 +394,9 @@ def register():
         data = (username, generate_password_hash(password))
         cursor.execute(user, data)
         connection.commit()
+
+        # Close cursor
+        cursor.close()
 
         return redirect("/")
     return render_template("register.html")
