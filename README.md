@@ -1,3 +1,14 @@
+# Birthday reminder
+
+## Video Demo: https://www.youtube.com/watch?v=_YgHf4D31kQ&t=4s
+
+## Description:
+
+Birthday Reminder is a web application written in Python and Flask.
+Add birthdays of friends and family members easily and get email reminders automatically.
+
+# Notes
+
 ## Docker
 
 https://docs.docker.com
