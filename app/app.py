@@ -35,7 +35,7 @@ connection = mysql.get_connection("birthday_reminder")
 def send_mail():
 
     # Create cursor
-    cursor = connection.cursor(buffered=True)
+    cursor = connection.cursor()
 
     # Get all birthdays where email notification is enabled
     query = "SELECT * FROM birthdays WHERE email_notification = 1"
@@ -89,7 +89,7 @@ scheduler.add_job(send_mail, 24)
 @login_required
 def index():
     # Create cursor
-    cursor = connection.cursor(buffered=True)
+    cursor = connection.cursor()
 
     # Get birthdays where display on main page is True and limit to 5 entries
     query = ("SELECT * FROM birthdays WHERE display_on_main_page = 1 LIMIT 5")
@@ -147,7 +147,7 @@ def add_birthday():
     if request.method == "POST":
 
         # Create cursor
-        cursor = connection.cursor(buffered=True)
+        cursor = connection.cursor()
 
         # Get the form data
         first_name = request.form.get("firstName")
@@ -189,7 +189,7 @@ def add_birthday():
 def edit(id):
 
     # Create cursor
-    cursor = connection.cursor(buffered=True)
+    cursor = connection.cursor()
 
     if request.method == "POST":
 
@@ -244,7 +244,7 @@ def edit(id):
 @login_required
 def delete(id):
     # Create cursor
-    cursor = connection.cursor(buffered=True)
+    cursor = connection.cursor()
 
     query = ("DELETE FROM birthdays WHERE id = %s")
     cursor.execute(query, (id,))
@@ -261,7 +261,7 @@ def delete(id):
 def list_birthdays():
 
     # Create cursor
-    cursor = connection.cursor(buffered=True)
+    cursor = connection.cursor()
 
     # Create empty array for birthdays
     birthdays_sorted_by_month = []
@@ -308,7 +308,7 @@ def login():
     if request.method == "POST":
 
         # Create cursor
-        cursor = connection.cursor(buffered=True)
+        cursor = connection.cursor()
 
         # Get the form data
         username = request.form.get("username")
@@ -358,7 +358,7 @@ def register():
     if request.method == "POST":
 
         # Create cursor
-        cursor = connection.cursor(buffered=True)
+        cursor = connection.cursor()
 
         # Get the form data
         username = request.form.get("username")
